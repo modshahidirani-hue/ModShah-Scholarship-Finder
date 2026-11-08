@@ -1,0 +1,1 @@
+# ModShah Scholarship Finder\n\nBeginner-friendly Flask + MySQL starter project. Follow SETUP.md.\n

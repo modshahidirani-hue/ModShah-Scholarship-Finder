@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+
+{% block title %}All Scholarships | ModShah{% endblock %}
+
+{% block content %}
+
+<section class="directory-header">
+    <small>SCHOLARSHIP DISCOVERY PLATFORM</small>
+
+    <h1>Find Your Scholarship 🎓</h1>
+
+    <p class="lead">
+        Explore government, state, private, merit-based and category-based
+        scholarship opportunities across India.
+    </p>
+</section>
+
+
+<!-- TOTAL SCHOLARSHIPS -->
+
+<section class="directory-summary">
+
+    <div class="summary-card">
+        <h2>{{ total }}</h2>
+        <p>Scholarships Found</p>
+    </div>
+
+    <div class="summary-card">
+        <h2>{{ category_counts|length }}</h2>
+        <p>Scholarship Categories</p>
+    </div>
+
+    <div class="summary-card">
+        <h2>{{ scheme_types|length }}</h2>
+        <p>Scholarship Types</p>
+    </div>
+
+</section>
+
+
+<!-- CATEGORY-WISE COUNTS -->
+
+<h2>Explore Categories</h2>
+
+<div class="category-list">
+
+    <a class="category-item"
+       href="{{ url_for('scholarships') }}">
+        <strong>All Scholarships</strong>
+    </a>
+
+    {% for category in category_counts %}
+
+    <a class="category-item"
+       href="{{ url_for('scholarships', category=category.category) }}">
+
+        <strong>{{ category.category }}</strong>
+
+        <span>{{ category.total }} scholarships</span>
+
+    </a>
+
+    {% endfor %}
+
+</div>
+
+
+<!-- SEARCH AND FILTERS -->
+
+<section class="directory-filter">
+
+    <h2>Search Scholarships</h2>
+
+    <form method="GET" action="{{ url_for('scholarships') }}">
+
+        <label>Search by name, provider or keyword</label>
+
+        <input
+            type="text"
+            name="q"
+            value="{{ keyword }}"
+            placeholder="Example: AICTE, Engineering, Merit, SC..."
+        >
+
+        <label>Scholarship Category</label>
+
+        <select name="category">
+
+            <option value="">All Categories</option>
+
+            {% for category in category_counts %}
+
+            <option
+                value="{{ category.category }}"
+                {% if selected_category == category.category %}selected{% endif %}
+            >
+                {{ category.category }}
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <label>Scholarship Type</label>
+
+        <select name="scheme_type">
+
+            <option value="">All Scholarship Types</option>
+
+            {% for item in scheme_types %}
+
+            <option
+                value="{{ item.scheme_type }}"
+                {% if selected_type == item.scheme_type %}selected{% endif %}
+            >
+                {{ item.scheme_type }}
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <label>Education Level</label>
+
+        <select name="education_level">
+
+            <option value="">All Education Levels</option>
+
+            {% for item in education_levels %}
+
+            <option
+                value="{{ item.education_level }}"
+                {% if selected_education == item.education_level %}selected{% endif %}
+            >
+                {{ item.education_level }}
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+        <button type="submit" class="btn">
+            Search Scholarships
+        </button>
+
+        <a href="{{ url_for('scholarships') }}" class="btn light">
+            Clear Filters
+        </a>
+
+    </form>
+
+</section>
+
+
+<!-- SCHOLARSHIP LIST -->
+
+<section class="scholarship-results">
+
+    <h2>Available Scholarships</h2>
+
+    <p class="lead">
+        Showing {{ scholarships|length }} scholarship records.
+    </p>
+
+    <div class="cards">
+
+        {% for s in scholarships %}
+
+        <article class="scholarship-card">
+
+            <span class="tag">
+                {{ s.category or 'General' }}
+            </span>
+
+            <h3>{{ s.title }}</h3>
+
+            <p><strong>Provider:</strong> {{ s.provider }}</p>
+
+            <p>{{ s.description }}</p>
+
+            <p>
+                <strong>Scholarship Type:</strong>
+                {{ s.scheme_type or 'Not specified' }}
+            </p>
+
+            <p>
+                <strong>Education:</strong>
+                {{ s.education_level or 'All levels' }}
+            </p>
+
+            <p>
+                <strong>Academic Year:</strong>
+                {{ s.academic_year or 'Check official notice' }}
+            </p>
+
+            <p>
+                <strong>Minimum Marks:</strong>
+                {{ s.minimum_marks if s.minimum_marks is not none else 'See official notice' }}
+            </p>
+
+            <p>
+                <strong>Income Limit:</strong>
+
+                {% if s.income_limit %}
+                    ₹{{ '{:,.0f}'.format(s.income_limit) }}
+                {% else %}
+                    See official notice
+                {% endif %}
+
+            </p>
+
+            <h3>
+                {% if s.amount %}
+                    ₹{{ '{:,.0f}'.format(s.amount) }}
+                {% else %}
+                    Amount varies
+                {% endif %}
+            </h3>
+
+            <p>
+                <strong>Deadline:</strong>
+
+                {% if s.deadline %}
+                    {{ s.deadline.strftime('%d %b %Y') }}
+                {% else %}
+                    Check official website
+                {% endif %}
+
+            </p>
+
+            {% if s.official_url %}
+
+<a
+    href="{{ s.official_url }}"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="btn apply-now"
+    style="display: inline-block; text-decoration: none; margin: 10px 0;"
+>
+    APPLY NOW ↗
+</a>
+
+{% else %}
+
+<p>Application link not available.</p>
+
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('apply', sid=s.id) }}">
+
+                <button type="submit" class="btn light">
+                    Add to My Tracker
+                </button>
+
+            </form>
+
+        </article>
+
+        {% else %}
+
+        <p>No scholarships match your search.</p>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}
